@@ -9,7 +9,7 @@
     h2 {
         @apply text-2xl font-bold mt-5 mb-1;
     }
-    h2 {
+    h3 {
         @apply text-xl font-bold mt-5 mb-1;
     }
     h4 {
