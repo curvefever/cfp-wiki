@@ -32,7 +32,7 @@ export default async function PageHistory({ params }: { params: { slug: string }
                     </tr>
                 </thead>
                 <tbody>
-                    {history.reverse().map((entry) => <tr>
+                    {history.reverse().map((entry) => <tr key={entry.id}>
                         <td>{formatDate(new Date(entry.timestamp), true)}</td>
                         <td>{entry.user}</td>
                         <td>{entry.edit_summary}</td>
