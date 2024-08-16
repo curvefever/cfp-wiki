@@ -1,0 +1,52 @@
+@import url('@radix-ui/colors/tomato-dark.css');
+@import url('@radix-ui/colors/mauve-dark.css');
+
+.dark-editor {
+  --accentBase: var(--tomato-1);
+  --accentBgSubtle: var(--tomato-2);
+  --accentBg: var(--tomato-3);
+  --accentBgHover: var(--tomato-4);
+  --accentBgActive: var(--tomato-5);
+  --accentLine: var(--tomato-6);
+  --accentBorder: var(--tomato-7);
+  --accentBorderHover: var(--tomato-8);
+  --accentSolid: var(--tomato-9);
+  --accentSolidHover: var(--tomato-10);
+  --accentText: var(--tomato-11);
+  --accentTextContrast: var(--tomato-12);
+
+  --baseBase: var(--blue-1);
+  --baseBgSubtle: var(--blue-2);
+  --baseBg: rgba(0,0,0,0.1);
+  --baseBgHover: var(--blue-4);
+  --baseBgActive: var(--blue-5);
+  --baseLine: var(--blue-6);
+  --baseBorder: var(--blue-7);
+  --baseBorderHover: var(--blue-8);
+  --baseSolid: var(--blue-9);
+  --baseSolidHover: var(--blue-10);
+  --baseText: white;
+  --baseTextContrast: white;
+
+  --admonitionTipBg: var(--cyan-6);
+  --admonitionTipBorder: var(--cyan-10);
+  
+  --admonitionInfoBg: var(--grass-6);
+  --admonitionInfoBorder: var(--grass-10);
+
+  --admonitionCautionBg: var(--amber-6);
+  --admonitionCautionBorder: var(--amber-10);
+
+  --admonitionDangerBg: var(--red-6);
+  --admonitionDangerBorder: var(--red-10);
+
+  --admonitionNoteBg: var(--mauve-6);
+  --admonitionNoteBorder: var(--mauve-10);
+
+  font-family: var(--font-asap);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  color: white;
+  --basePageBg: var(--blue-2);
+  background: rgba(0,0,0,0.2);
+}
