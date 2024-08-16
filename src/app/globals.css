@@ -4,16 +4,16 @@
 
 @layer base {
     h1 {
-        @apply text-3xl font-bold mt-5 mb-3;
+        @apply text-3xl font-bold mt-5 mb-1;
     }
     h2 {
-        @apply text-2xl font-bold mt-5 mb-3;
+        @apply text-2xl font-bold mt-5 mb-1;
     }
-    h3 {
-        @apply text-xl font-bold mt-5 mb-3;
+    h2 {
+        @apply text-xl font-bold mt-5 mb-1;
     }
     h4 {
-        @apply text-lg font-bold mt-5 mb-3;
+        @apply text-lg font-bold mt-5 mb-1;
     }
     a {
         @apply text-primary hover:text-primary-light hover:underline cursor-pointer;  
