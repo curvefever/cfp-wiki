@@ -17,6 +17,8 @@
     }
     p {
         @apply my-2;
+        letter-spacing: -0.1px;
+        font-size: 15px;
     }
     ul {
         @apply list-disc pl-8 my-4;
