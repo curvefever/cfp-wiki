@@ -12,7 +12,7 @@ interface IProps {
 
 export default function EditPageDetailsPopup({ page }: IProps) {
   const { dispatch } = usePopupsContext();
-  const [formData, setFormData] = useState({ title: page.title, description: page.description });
+  const [formData, setFormData] = useState({ title: page.title, description: page.description, next_link: page.next_link });
   const [error, setError] = useState('');
 
   const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -29,6 +29,7 @@ export default function EditPageDetailsPopup({ page }: IProps) {
     }
 
     dispatch({ type: 'removePopup' });
+    window.location.reload();
   }
   
   return (
@@ -37,7 +38,9 @@ export default function EditPageDetailsPopup({ page }: IProps) {
           <label htmlFor="title">Title</label>
           <input id="title" name='title' type="text" value={formData.title} onChange={onChange} required className='mb-1' />
           <label htmlFor="description">Description</label>
-          <textarea id="description" name='description' value={formData.description} onChange={onChange} required />
+          <textarea id="description" name='description' className='min-w-[500px]' value={formData.description} onChange={onChange} required />
+          <label htmlFor="next_link">Next link</label>
+          <input id="next_link" name='next_link' type="text" value={formData.next_link} onChange={onChange} className='mb-1' />
           {error && <p className='text-danger'>{error}</p>}
           <Button color="secondary" className='mt-3' type='submit'>Save Changes</Button>
         </form>

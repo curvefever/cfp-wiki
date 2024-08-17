@@ -14,8 +14,8 @@ export function Main(props: IMainProps) {
         <>
         <MenuBar session={props.session} menuItems={props.menuItems} />
         {props.header}
-        <main className="flex-1 flex justify-center p-5 py-8 md:p-10">
-            <div className="flex flex-col w-full max-w-[1200px]">
+        <main className="flex-1 flex justify-center bg-bg">
+            <div className="relative flex flex-col w-full max-w-[1000px] bg-bg-darker p-5 py-8 md:p-10">
                 {props.children}
             </div>
         </main>

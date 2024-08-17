@@ -13,6 +13,8 @@ import {unified} from 'unified'
 import remarkAdmonitions from '../../features/remark/RemarkAdmonitions';
 import '/src/styles/markdown.css'
 import MenuButtons from './MenuButtons';
+import { Icon } from '../../components/ui/icon';
+import HomeLink from './HomeLink';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
 	const supabase = await createSupbaseServerClient();
@@ -50,9 +52,20 @@ export default async function Page({ params }: { params: { slug: string } }) {
 		.use(rehypeRaw)
 		.use(rehypeStringify)
 		.process(page.content);
+
     
     return <Main session={data.session} menuItems={<MenuButtons page={page} />}>
+		{pageSlug !== 'home' && <HomeLink className='absolute top-0' />}
 		<h1>{page.title}</h1>
-		<div dangerouslySetInnerHTML={{ __html: htmlContent.toString() }}></div>
+		<div dangerouslySetInnerHTML={{ __html: htmlContent.toString() }} className='mb-5'></div>
+
+		{pageSlug !== 'home' && <HomeLink className='absolute bottom-0' />}
+		<a href={`/${pageSlug}`}>
+			<Icon icon="arrow-left" className='absolute bottom-0 left-[50%] translate-x-[-50%] p-3 h-12 rotate-90' />
+		</a>
+		{page.next_link && <a href={`/${page.next_link}`} className='absolute px-5 py-3 w-fit bottom-0 right-0 flex items-center'>
+			<span className='ml-2'>{page.next_link}</span>
+			<Icon icon="arrow-left" className='h-8 rotate-180' />
+		</a>}
     </Main>;
 }

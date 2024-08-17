@@ -17,7 +17,7 @@ export default async function EditPage({ params }: { params: { slug: string } })
 	const postRes = await supabase.from('pages').select().eq('slug', pageSlug).single();
 	let page: IPage | undefined = postRes.data;
     if (!page) {
-        page = { slug: pageSlug, title: pageSlug, description: pageSlug, content: '' };
+        page = { slug: pageSlug, title: pageSlug, description: pageSlug, next_link: '', content: '' };
     }
     
     return <Main session={data.session}>

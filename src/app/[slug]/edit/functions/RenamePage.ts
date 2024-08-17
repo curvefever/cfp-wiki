@@ -33,11 +33,13 @@ export async function renamePage(pageSlug: string, newPageSlug: string) {
     if (pagesRes.data) {
         const pages = pagesRes.data as IPage[];
         for (const page of pages) {
-            if (page.content.indexOf(`](/${pageSlug}`) == -1) {
-                continue;
+            if (page.next_link === pageSlug) {
+                updatePromises.push(supabase.from('pages').update({ next_link: newPageSlug }).eq('slug', newPageSlug));
             }
-            const newContent = page.content.replace(new RegExp(`\\]\\(/${pageSlug}`, 'g'), `](/${newPageSlug}`);
-            updatePromises.push(supabase.from('pages').update({ content: newContent }).eq('slug', newPageSlug));
+            if (page.content.indexOf(`](/${pageSlug}`) !== -1) {
+                const newContent = page.content.replace(new RegExp(`\\]\\(/${pageSlug}`, 'g'), `](/${newPageSlug}`);
+                updatePromises.push(supabase.from('pages').update({ content: newContent }).eq('slug', newPageSlug));
+            }
         }
     }
     await Promise.all(updatePromises);

@@ -37,7 +37,7 @@
     }
     textarea,
     input {
-        @apply block px-5 py-2 bg-bg-dark rounded-lg border-none w-full;
+        @apply block px-5 py-2 bg-bg-darkest rounded-lg border-none w-full;
     }
     label {
         @apply text-xs m-0;
