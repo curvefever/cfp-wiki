@@ -37,3 +37,7 @@
     border-color: #862bcc;
     background-color: rgba(134, 43, 204, 0.3);
 }
+
+summary {
+    cursor: pointer;
+}
