@@ -1,5 +1,5 @@
-import { permanentRedirect } from "next/navigation";
+import Page from "./[slug]/page";
 
 export default async function Home() {
-    return permanentRedirect('/home');
+    return Page({ params: { slug: 'home' } });
 }
