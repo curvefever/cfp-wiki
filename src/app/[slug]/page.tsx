@@ -1,6 +1,6 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { cache } from 'react';
 import { IPage } from '../../features/pages/IPage';
-import { createSupbaseServerClient } from '../../supabase-server';
 import { Main } from '../../components/layout/main';
 import { Button } from '../../components/ui/button';
 import rehypeStringify from 'rehype-stringify'
@@ -15,11 +15,54 @@ import '/src/styles/markdown.css'
 import MenuButtons from './MenuButtons';
 import { Icon } from '../../components/ui/icon';
 import HomeLink from './HomeLink';
+import AuthenticatedOnly from '../../components/AuthenticatedOnly';
+import { createSupbasePublicClient } from '../../supabase-public';
+
+export const dynamic = 'force-dynamic';
+
+const MAX_RENDERED_CONTENT_CACHE_SIZE = 100;
+const renderedContentCache = new Map<string, string>();
+
+const getPage = cache(async (slug: string): Promise<IPage | null> => {
+	const supabase = createSupbasePublicClient();
+	const postRes = await supabase
+		.from('pages')
+		.select('slug,title,description,next_link,content')
+		.eq('slug', slug)
+		.single();
+
+	return postRes.data as IPage | null;
+});
+
+async function renderContent(content: string) {
+	const cachedHtml = renderedContentCache.get(content);
+	if (cachedHtml) {
+		return cachedHtml;
+	}
+
+	const htmlContent = (await unified()
+		.use(remarkParse)
+		.use(remarkGfm)
+		.use(remarkAdmonitions)
+		.use(remarkBreaks)
+		.use(remarkRehype, {allowDangerousHtml: true})
+		.use(rehypeRaw)
+		.use(rehypeStringify)
+		.process(content)).toString();
+
+	if (renderedContentCache.size >= MAX_RENDERED_CONTENT_CACHE_SIZE) {
+		const oldestKey = renderedContentCache.keys().next().value;
+		if (oldestKey) {
+			renderedContentCache.delete(oldestKey);
+		}
+	}
+
+	renderedContentCache.set(content, htmlContent);
+	return htmlContent;
+}
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-	const supabase = await createSupbaseServerClient();
-	const postRes = await supabase.from('pages').select().eq('slug', params.slug).single();
-	const page: IPage | undefined = postRes.data;
+	const page = await getPage(params.slug);
    
 	return {
 		title: `CF Wiki | ${page?.title || 'Page not found'}`,
@@ -28,36 +71,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
 export default async function Page({ params }: { params: { slug: string } }) {
-	const supabase = await createSupbaseServerClient();
-	const { data } = await supabase.auth.getSession();
-    const isLoggedIn = data.session !== null;
-
 	const pageSlug = params.slug;
-	const postRes = await supabase.from('pages').select().eq('slug', pageSlug).single();
-	const page: IPage | undefined = postRes.data;
+	const page = await getPage(pageSlug);
 
 	if (!page) {
-		return (<Main session={data.session}>
+		return (<Main>
             <h1>Page not found.</h1>
-            {isLoggedIn && <Button href={`/${pageSlug}/edit`}>Create page</Button>}
+            <AuthenticatedOnly>
+				<Button href={`/${pageSlug}/edit`}>Create page</Button>
+			</AuthenticatedOnly>
         </Main>)
 	}
 
-	const htmlContent = await unified()
-		.use(remarkParse)
-		.use(remarkGfm)
-		.use(remarkAdmonitions)
-		.use(remarkBreaks)
-		.use(remarkRehype, {allowDangerousHtml: true})
-		.use(rehypeRaw)
-		.use(rehypeStringify)
-		.process(page.content);
+	const htmlContent = await renderContent(page.content);
 
     
-    return <Main session={data.session} menuItems={<MenuButtons page={page} />}>
+	return <Main menuItems={<MenuButtons page={page} />}>
 		{pageSlug !== 'home' && <HomeLink className='absolute top-0' />}
 		<h1>{page.title}</h1>
-		<div dangerouslySetInnerHTML={{ __html: htmlContent.toString() }} className='mb-5'></div>
+		<div dangerouslySetInnerHTML={{ __html: htmlContent }} className='mb-5'></div>
 
 		{pageSlug !== 'home' && <HomeLink className='absolute bottom-0' />}
 		<a href={`/${pageSlug}`}>
@@ -67,5 +99,5 @@ export default async function Page({ params }: { params: { slug: string } }) {
 			<span className='ml-2'>{page.next_link}</span>
 			<Icon icon="arrow-left" className='h-8 rotate-180' />
 		</a>}
-    </Main>;
+	</Main>;
 }
