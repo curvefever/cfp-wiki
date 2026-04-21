@@ -18,8 +18,10 @@ const icons: { [key: string]: string } = {
 const remarkAdmonitions: Plugin = () => {
   return (tree) => {
     visit(tree, 'paragraph', (node: ParagraphNode, index: number, parent: ParagraphNode) => {
-
-      const text = node.children[0]?.value || '';
+      const text = node.children
+        .map((child) => child.value || '')
+        .join('')
+        .replace(/\r\n?/g, '\n');
       const match = text.match(/^:::(\w+)\n([\s\S]+?)\n:::$/);
 
       if (match && parent) {

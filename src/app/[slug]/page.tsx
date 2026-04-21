@@ -10,7 +10,7 @@ import remarkRehype from "remark-rehype";
 import remarkGfm from "remark-gfm";
 import { remark } from "remark";
 import remarkAdmonitions from "../../features/remark/RemarkAdmonitions";
-import "/src/styles/markdown.css";
+import "../../styles/markdown.css";
 import MenuButtons from "./MenuButtons";
 import { Icon } from "../../components/ui/icon";
 import HomeLink from "./HomeLink";
@@ -20,17 +20,21 @@ import { createSupbasePublicClient } from "../../supabase-public";
 const MAX_RENDERED_CONTENT_CACHE_SIZE = 100;
 const renderedContentCache = new Map<string, string>();
 
-const getPage = unstable_cache(async (slug: string): Promise<IPage | null> => {
-  const supabase = createSupbasePublicClient();
-  const postRes = await supabase
-    .from("pages")
-    .select("slug,title,description,next_link,content")
-    .eq("slug", slug)
-    .single();
-  return postRes.data as IPage | null;
-}, ["pages"], {
-  tags: ["pages"],
-});
+const getPage = unstable_cache(
+  async (slug: string): Promise<IPage | null> => {
+    const supabase = createSupbasePublicClient();
+    const postRes = await supabase
+      .from("pages")
+      .select("slug,title,description,next_link,content")
+      .eq("slug", slug)
+      .single();
+    return postRes.data as IPage | null;
+  },
+  ["pages"],
+  {
+    tags: ["pages"],
+  },
+);
 
 async function renderContent(content: string) {
   const cachedHtml = renderedContentCache.get(content);
@@ -96,7 +100,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       <h1>{page.title}</h1>
       <div
         dangerouslySetInnerHTML={{ __html: htmlContent }}
-        className="mb-5"
+        className="markdown-content mb-5"
       ></div>
 
       {pageSlug !== "home" && <HomeLink className="absolute bottom-0" />}
