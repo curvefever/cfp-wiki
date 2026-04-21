@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { IPageHistory } from "../../../../../features/pages/IPageHistory";
 import { createSupbaseServerClient } from "../../../../../supabase-server";
+import { revalidateWikiPages } from "../../../../../utils/RevalidateWikiPages";
 
 export async function restorePageFromDiff(diffID: string) {
     const supabase = await createSupbaseServerClient();
@@ -22,6 +23,8 @@ export async function restorePageFromDiff(diffID: string) {
     if (updateRes.error) {
         return { error: updateRes.error.message };
     }
+
+    revalidateWikiPages([history.page]);
 
     return redirect('/' + history.page);
 }

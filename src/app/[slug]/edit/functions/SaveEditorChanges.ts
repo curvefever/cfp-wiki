@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { IPage } from "../../../../features/pages/IPage";
 import { createSupbaseServerClient } from "../../../../supabase-server";
+import { revalidateWikiPages } from "../../../../utils/RevalidateWikiPages";
 
 export async function saveEditorChanges(page: IPage, content: string, summary: string, user: string) {
     if (summary.length === 0) {
@@ -24,6 +25,8 @@ export async function saveEditorChanges(page: IPage, content: string, summary: s
     if (insertRes.error) {
         return { error: insertRes.error.message };
     }
+
+    revalidateWikiPages([page.slug]);
 
     return redirect('/' + page.slug);
 }

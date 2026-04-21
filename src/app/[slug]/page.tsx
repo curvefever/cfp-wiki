@@ -1,103 +1,120 @@
-import type { Metadata } from 'next';
-import { cache } from 'react';
-import { IPage } from '../../features/pages/IPage';
-import { Main } from '../../components/layout/main';
-import { Button } from '../../components/ui/button';
-import rehypeStringify from 'rehype-stringify'
-import rehypeRaw from 'rehype-raw'
-import remarkBreaks from 'remark-breaks'
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import remarkGfm from 'remark-gfm'
-import {unified} from 'unified'
-import remarkAdmonitions from '../../features/remark/RemarkAdmonitions';
-import '/src/styles/markdown.css'
-import MenuButtons from './MenuButtons';
-import { Icon } from '../../components/ui/icon';
-import HomeLink from './HomeLink';
-import AuthenticatedOnly from '../../components/AuthenticatedOnly';
-import { createSupbasePublicClient } from '../../supabase-public';
-
-export const dynamic = 'force-dynamic';
+import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
+import { IPage } from "../../features/pages/IPage";
+import { Main } from "../../components/layout/main";
+import { Button } from "../../components/ui/button";
+import rehypeStringify from "rehype-stringify";
+import rehypeRaw from "rehype-raw";
+import remarkBreaks from "remark-breaks";
+import remarkRehype from "remark-rehype";
+import remarkGfm from "remark-gfm";
+import { remark } from "remark";
+import remarkAdmonitions from "../../features/remark/RemarkAdmonitions";
+import "/src/styles/markdown.css";
+import MenuButtons from "./MenuButtons";
+import { Icon } from "../../components/ui/icon";
+import HomeLink from "./HomeLink";
+import AuthenticatedOnly from "../../components/AuthenticatedOnly";
+import { createSupbasePublicClient } from "../../supabase-public";
 
 const MAX_RENDERED_CONTENT_CACHE_SIZE = 100;
 const renderedContentCache = new Map<string, string>();
 
-const getPage = cache(async (slug: string): Promise<IPage | null> => {
-	const supabase = createSupbasePublicClient();
-	const postRes = await supabase
-		.from('pages')
-		.select('slug,title,description,next_link,content')
-		.eq('slug', slug)
-		.single();
-
-	return postRes.data as IPage | null;
+const getPage = unstable_cache(async (slug: string): Promise<IPage | null> => {
+  const supabase = createSupbasePublicClient();
+  const postRes = await supabase
+    .from("pages")
+    .select("slug,title,description,next_link,content")
+    .eq("slug", slug)
+    .single();
+  return postRes.data as IPage | null;
+}, ["pages"], {
+  tags: ["pages"],
 });
 
 async function renderContent(content: string) {
-	const cachedHtml = renderedContentCache.get(content);
-	if (cachedHtml) {
-		return cachedHtml;
-	}
-
-	const htmlContent = (await unified()
-		.use(remarkParse)
-		.use(remarkGfm)
-		.use(remarkAdmonitions)
-		.use(remarkBreaks)
-		.use(remarkRehype, {allowDangerousHtml: true})
-		.use(rehypeRaw)
-		.use(rehypeStringify)
-		.process(content)).toString();
-
-	if (renderedContentCache.size >= MAX_RENDERED_CONTENT_CACHE_SIZE) {
-		const oldestKey = renderedContentCache.keys().next().value;
-		if (oldestKey) {
-			renderedContentCache.delete(oldestKey);
-		}
-	}
-
-	renderedContentCache.set(content, htmlContent);
-	return htmlContent;
-}
-
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-	const page = await getPage(params.slug);
-   
-	return {
-		title: `CF Wiki | ${page?.title || 'Page not found'}`,
-		description: page?.description || '',
-	}
+  const cachedHtml = renderedContentCache.get(content);
+  if (cachedHtml) {
+    return cachedHtml;
   }
 
+  const htmlContent = (
+    await remark()
+      .use(remarkGfm)
+      .use(remarkAdmonitions)
+      .use(remarkBreaks)
+      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(rehypeRaw)
+      .use(rehypeStringify)
+      .process(content)
+  ).toString();
+
+  if (renderedContentCache.size >= MAX_RENDERED_CONTENT_CACHE_SIZE) {
+    const oldestKey = renderedContentCache.keys().next().value;
+    if (oldestKey) {
+      renderedContentCache.delete(oldestKey);
+    }
+  }
+
+  renderedContentCache.set(content, htmlContent);
+  return htmlContent;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const page = await getPage(params.slug);
+
+  return {
+    title: `CF Wiki | ${page?.title || "Page not found"}`,
+    description: page?.description || "",
+  };
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
-	const pageSlug = params.slug;
-	const page = await getPage(pageSlug);
+  const pageSlug = params.slug;
+  const page = await getPage(pageSlug);
 
-	if (!page) {
-		return (<Main>
-            <h1>Page not found.</h1>
-            <AuthenticatedOnly>
-				<Button href={`/${pageSlug}/edit`}>Create page</Button>
-			</AuthenticatedOnly>
-        </Main>)
-	}
+  if (!page) {
+    return (
+      <Main>
+        <h1>Page not found.</h1>
+        <AuthenticatedOnly>
+          <Button href={`/${pageSlug}/edit`}>Create page</Button>
+        </AuthenticatedOnly>
+      </Main>
+    );
+  }
 
-	const htmlContent = await renderContent(page.content);
+  const htmlContent = await renderContent(page.content);
 
-    
-	return <Main menuItems={<MenuButtons page={page} />}>
-		{pageSlug !== 'home' && <HomeLink className='absolute top-0' />}
-		<h1>{page.title}</h1>
-		<div dangerouslySetInnerHTML={{ __html: htmlContent }} className='mb-5'></div>
+  return (
+    <Main menuItems={<MenuButtons page={page} />}>
+      {pageSlug !== "home" && <HomeLink className="absolute top-0" />}
+      <h1>{page.title}</h1>
+      <div
+        dangerouslySetInnerHTML={{ __html: htmlContent }}
+        className="mb-5"
+      ></div>
 
-		{pageSlug !== 'home' && <HomeLink className='absolute bottom-0' />}
-		<a href={`/${pageSlug}`}>
-			<Icon icon="arrow-left" className='absolute bottom-0 left-[50%] translate-x-[-50%] p-3 h-12 rotate-90' />
-		</a>
-		{page.next_link && <a href={`/${page.next_link}`} className='absolute px-5 py-3 w-fit bottom-0 right-0 flex items-center'>
-			<span className='ml-2'>{page.next_link}</span>
-			<Icon icon="arrow-left" className='h-8 rotate-180' />
-		</a>}
-	</Main>;
+      {pageSlug !== "home" && <HomeLink className="absolute bottom-0" />}
+      <a href={`/${pageSlug}`}>
+        <Icon
+          icon="arrow-left"
+          className="absolute bottom-0 left-[50%] translate-x-[-50%] p-3 h-12 rotate-90"
+        />
+      </a>
+      {page.next_link && (
+        <a
+          href={`/${page.next_link}`}
+          className="absolute px-5 py-3 w-fit bottom-0 right-0 flex items-center"
+        >
+          <span className="ml-2">{page.next_link}</span>
+          <Icon icon="arrow-left" className="h-8 rotate-180" />
+        </a>
+      )}
+    </Main>
+  );
 }

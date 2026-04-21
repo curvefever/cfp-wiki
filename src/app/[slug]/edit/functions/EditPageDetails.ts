@@ -1,6 +1,7 @@
 'use server'
 
 import { createSupbaseServerClient } from "../../../../supabase-server";
+import { revalidateWikiPages } from "../../../../utils/RevalidateWikiPages";
 
 interface IPageDetails {
     title: string;
@@ -27,5 +28,8 @@ export async function editPageDetails(pageSlug: string, details: IPageDetails) {
     if (postRes.error) {
         return { error: postRes.error.message };
     }
+
+    revalidateWikiPages([pageSlug]);
+
     return { success: true };
 }

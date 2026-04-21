@@ -2,6 +2,7 @@
 
 import { IPage } from "../../../../features/pages/IPage";
 import { createSupbaseServerClient } from "../../../../supabase-server";
+import { revalidateWikiPages } from "../../../../utils/RevalidateWikiPages";
 
 const slugRegex = /^[a-z-]+$/;
 
@@ -43,6 +44,8 @@ export async function renamePage(pageSlug: string, newPageSlug: string) {
         }
     }
     await Promise.all(updatePromises);
+
+    revalidateWikiPages([pageSlug, newPageSlug]);
 
     return { success: true };
 }
