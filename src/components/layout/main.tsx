@@ -3,7 +3,7 @@ import { MenuBar } from './menubar';
 import { Session } from '@supabase/supabase-js';
 
 interface IMainProps {
-    session: Session | null;
+    session?: Session | null;
     header?: ReactNode;
     menuItems?: ReactNode;
     children?: ReactNode;
