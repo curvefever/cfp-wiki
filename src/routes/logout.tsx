@@ -1,10 +1,8 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { logout } from '../app/logout/Logout'
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/logout')({
+export const Route = createFileRoute("/logout")({
   preload: false,
-  loader: async () => {
-    await logout()
-    throw redirect({ to: '/' })
+  loader: () => {
+    throw redirect({ to: "/" });
   },
-})
+});

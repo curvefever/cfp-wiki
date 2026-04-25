@@ -1,15 +1,17 @@
 "use client";
 
-import { logout } from "../../app/logout/Logout";
 import { Button } from "../ui/button";
 import { ReactNode } from "react";
 import AuthenticatedOnly from "../AuthenticatedOnly";
+import { useAuth } from "../../features/auth/components/AuthProvider";
 
 interface IMenuBarProps {
   menuItems?: ReactNode;
 }
 
 export function MenuBar(props: IMenuBarProps) {
+  const { logout } = useAuth();
+
   if (!props.menuItems) {
     return null;
   }
@@ -25,8 +27,8 @@ export function MenuBar(props: IMenuBarProps) {
           </div>
         </div>
         <Button
-          onClick={async () => {
-            await logout();
+          onClick={() => {
+            logout();
             window.location.href = "/";
           }}
           color="danger"

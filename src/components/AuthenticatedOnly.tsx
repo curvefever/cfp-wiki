@@ -1,39 +1,16 @@
 "use client";
 
-import { Session } from "@supabase/supabase-js";
-import { type ReactNode, useEffect, useState } from "react";
-import { createSupbaseBrowserClient } from "../supabase-client";
+import { type ReactNode } from "react";
+import { useAuth } from "../features/auth/components/AuthProvider";
 
 export default function AuthenticatedOnly({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const { canEditWiki } = useAuth();
 
-  useEffect(() => {
-    const supabase = createSupbaseBrowserClient();
-    let isMounted = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (isMounted) {
-        setSession(data.session);
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  if (!session) {
+  if (!canEditWiki) {
     return null;
   }
 

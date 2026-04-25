@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { canAuthEditWiki } from "../../../../features/auth/auth.shared";
 import { IPage } from "../../../../features/pages/IPage";
 import { revalidateWikiPages } from "../../../../utils/RevalidateWikiPages";
 
@@ -17,13 +18,14 @@ export const renamePage = createServerFn({ method: 'POST' })
         return { error: 'Slug can only contain regular characters and dashes (-)' };
     }
 
+    const { getRequestAuthSnapshot } = await import('../../../../features/auth/server/request-auth-snapshot.server');
+    const auth = await getRequestAuthSnapshot();
+    if (!canAuthEditWiki(auth)) {
+        return { error: 'You do not have permission to edit the wiki' };
+    }
+
     const { createSupbaseServerClient } = await import("../../../../supabase-server");
     const supabase = await createSupbaseServerClient();
-	const { data: sessionData } = await supabase.auth.getSession();
-    const isLoggedIn = sessionData.session !== null;
-    if (!isLoggedIn) {
-        return { error: 'You must be logged in' };
-    }
 
     // Change the page slug
 	const postRes = await supabase.from('pages').update({ slug: newPageSlug }).eq('slug', pageSlug);

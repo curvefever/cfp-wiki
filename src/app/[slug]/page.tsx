@@ -9,7 +9,6 @@ import remarkRehype from "remark-rehype";
 import remarkGfm from "remark-gfm";
 import { remark } from "remark";
 import remarkAdmonitions from "../../features/remark/RemarkAdmonitions";
-import "../../styles/markdown.css";
 import MenuButtons from "./MenuButtons";
 import { Icon } from "../../components/ui/icon";
 import HomeLink from "./HomeLink";
@@ -70,7 +69,13 @@ async function renderContent(content: string) {
 
 type WikiPageData = Awaited<ReturnType<typeof getWikiPageData>>;
 
-export function WikiPage({ data, pageSlug }: { data: WikiPageData; pageSlug: string }) {
+export function WikiPage({
+  data,
+  pageSlug,
+}: {
+  data: WikiPageData;
+  pageSlug: string;
+}) {
   const { page, htmlContent } = data;
 
   if (!page) {

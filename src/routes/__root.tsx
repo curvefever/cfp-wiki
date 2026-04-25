@@ -7,9 +7,16 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import Popups from "../app/Popups";
+import { AuthProvider } from "../features/auth/components/AuthProvider";
+import { getInitialAuth } from "../features/auth/server/auth.server-fns";
+import asapRegularWoff2 from "../assets/fonts/asap-regular-webfont.woff2?url";
+import asapSemiboldWoff2 from "../assets/fonts/asap-semibold-webfont.woff2?url";
+import asapBoldWoff2 from "../assets/fonts/asap-bold-webfont.woff2?url";
 import "../app/globals.css";
+import "../styles/markdown.css";
 
 export const Route = createRootRoute({
+  loader: () => getInitialAuth(),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -48,25 +55,69 @@ export const Route = createRootRoute({
       { rel: "shortcut icon", href: "/icon.png" },
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
       { rel: "apple-touch-icon-precomposed", href: "/icon.png" },
+      {
+        rel: "preload",
+        href: asapRegularWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: asapSemiboldWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: asapBoldWoff2,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
     ],
   }),
   component: RootComponent,
 });
 
 function RootComponent() {
+  const initialAuth = Route.useLoaderData();
+
   return (
     <RootDocument>
-      <Popups>
-        <Outlet />
-      </Popups>
+      <AuthProvider initialAuth={initialAuth}>
+        <Popups>
+          <Outlet />
+        </Popups>
+      </AuthProvider>
     </RootDocument>
   );
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const criticalHeadStyles = `
+    :root {
+      --font-asap: "Asap", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-asap);
+      background: #153c58;
+      color: #ffffff;
+    }
+  `;
+
   return (
     <html lang="en">
       <head>
+        <style dangerouslySetInnerHTML={{ __html: criticalHeadStyles }} />
         <HeadContent />
       </head>
       <body className="font-asap flex flex-col min-h-[100vh] overflow-x-hidden bg-bg text-text">

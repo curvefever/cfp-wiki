@@ -4,74 +4,73 @@ import { IPageHistory } from "../../../../features/pages/IPageHistory";
 import DiffViewer from "./DiffViewer";
 import { formatDate } from "../../../../utils/FormatDate";
 import RestorePageButton from "./RestorePageButton";
+import { canAuthEditWiki } from "../../../../features/auth/auth.shared";
 
+export const getPageHistoryDiffData = createServerFn({ method: "GET" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const { getRequestAuthSnapshot } =
+      await import("../../../../features/auth/server/request-auth-snapshot.server");
+    const auth = await getRequestAuthSnapshot();
+    if (!canAuthEditWiki(auth)) {
+      return { auth, history: undefined };
+    }
 
-export const getPageHistoryDiffData = createServerFn({ method: 'GET' })
-    .inputValidator((data: { id: string }) => data)
-    .handler(async ({ data }) => {
-	const { createSupbaseServerClient } = await import('../../../../supabase-server');
-	const supabase = await createSupbaseServerClient();
-	const { data: sessionData } = await supabase.auth.getSession();
-	const historyRes = await supabase.from('page_history').select().eq('id', data.id).single();
-    const history: IPageHistory | undefined = historyRes.data ? historyRes.data as IPageHistory : undefined;
+    const { createSupbaseServerClient } =
+      await import("../../../../supabase-server");
+    const supabase = await createSupbaseServerClient();
+    const historyRes = await supabase
+      .from("page_history")
+      .select()
+      .eq("id", data.id)
+      .single();
+    const history: IPageHistory | undefined = historyRes.data
+      ? (historyRes.data as IPageHistory)
+      : undefined;
 
-    return { history, session: sessionData.session };
-});
+    return { auth, history };
+  });
 
 type PageHistoryDiffData = Awaited<ReturnType<typeof getPageHistoryDiffData>>;
 
-export default function PageHistoryDiff({ data }: { data: PageHistoryDiffData }) {
-	const isLoggedIn = data.session !== null;
-    if (!isLoggedIn) {
-        return <Main session={data.session}>
-            <h1>You must be logged in.</h1>
-        </Main>;
-    }
+export default function PageHistoryDiff({
+  data,
+}: {
+  data: PageHistoryDiffData;
+}) {
+  if (!canAuthEditWiki(data.auth)) {
+    return (
+      <Main>
+        <h1>You do not have permission to edit the wiki.</h1>
+      </Main>
+    );
+  }
 
-    if (!data.history) {
-        return null;
-    }
+  if (!data.history) {
+    return null;
+  }
 
-    const history = data.history;
-    const diffID = String(history.id);
-    
-    return <Main session={data.session}>
-        <h1>Page diff</h1>
+  const history = data.history;
+  const diffID = String(history.id);
+
+  return (
+    <Main>
+      <h1>Page diff</h1>
+      <div>
         <div>
-            <div><b>Edited by: </b>{history.user}</div>
-            <div><b>Date: </b>{formatDate(new Date(history.timestamp), true)}</div>
+          <b>Edited by: </b>
+          {history.user}
         </div>
-        <RestorePageButton diffID={diffID} />
-        <DiffViewer oldValue={history.content_before} newValue={history.content_after} />
-    </Main>;
-}
-
-async function LegacyPageHistoryDiff({ params }: { params: { slug: string, id: string } }) {
-    const { createSupbaseServerClient } = await import('../../../../supabase-server');
-	const supabase = await createSupbaseServerClient();
-	const { data } = await supabase.auth.getSession();
-    const isLoggedIn = data.session !== null;
-    if (!isLoggedIn) {
-        return <Main session={data.session}>
-            <h1>You must be logged in.</h1>
-        </Main>;
-    }
-
-	const diffID = params.id;
-	const historyRes = await supabase.from('page_history').select().eq('id', diffID).single();
-    const history: IPageHistory | undefined = historyRes.data ? historyRes.data as IPageHistory : undefined;
-
-    if (!history) {
-        return null;
-    }
-    
-    return <Main session={data.session}>
-        <h1>Page diff</h1>
         <div>
-            <div><b>Edited by: </b>{history.user}</div>
-            <div><b>Date: </b>{formatDate(new Date(history.timestamp), true)}</div>
+          <b>Date: </b>
+          {formatDate(new Date(history.timestamp), true)}
         </div>
-        <RestorePageButton diffID={diffID} />
-        <DiffViewer oldValue={history.content_before} newValue={history.content_after} />
-    </Main>;
+      </div>
+      <RestorePageButton diffID={diffID} />
+      <DiffViewer
+        oldValue={history.content_before}
+        newValue={history.content_after}
+      />
+    </Main>
+  );
 }

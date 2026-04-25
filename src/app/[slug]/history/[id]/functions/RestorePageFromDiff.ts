@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { canAuthEditWiki } from "../../../../../features/auth/auth.shared";
 import { IPageHistory } from "../../../../../features/pages/IPageHistory";
 import { revalidateWikiPages } from "../../../../../utils/RevalidateWikiPages";
 
@@ -6,13 +7,15 @@ export const restorePageFromDiff = createServerFn({ method: 'POST' })
     .inputValidator((data: { diffID: string }) => data)
     .handler(async ({ data }) => {
     const { diffID } = data;
+
+    const { getRequestAuthSnapshot } = await import('../../../../../features/auth/server/request-auth-snapshot.server');
+    const auth = await getRequestAuthSnapshot();
+    if (!canAuthEditWiki(auth)) {
+        return { error: 'You do not have permission to edit the wiki' };
+    }
+
     const { createSupbaseServerClient } = await import("../../../../../supabase-server");
     const supabase = await createSupbaseServerClient();
-	const { data: sessionData } = await supabase.auth.getSession();
-    const isLoggedIn = sessionData.session !== null;
-    if (!isLoggedIn) {
-        return { error: 'You must be logged in' };
-    }
 
 	const historyRes = await supabase.from('page_history').select().eq('id', diffID).single();
     if (historyRes.error) {

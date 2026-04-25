@@ -1,9 +1,7 @@
 import { ReactNode } from "react";
 import { MenuBar } from "./menubar";
-import { Session } from "@supabase/supabase-js";
 
 interface IMainProps {
-  session?: Session | null;
   header?: ReactNode;
   menuItems?: ReactNode;
   children?: ReactNode;
