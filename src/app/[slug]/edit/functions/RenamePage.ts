@@ -1,12 +1,14 @@
-'use server'
-
+import { createServerFn } from "@tanstack/react-start";
 import { IPage } from "../../../../features/pages/IPage";
-import { createSupbaseServerClient } from "../../../../supabase-server";
 import { revalidateWikiPages } from "../../../../utils/RevalidateWikiPages";
 
 const slugRegex = /^[a-z-]+$/;
 
-export async function renamePage(pageSlug: string, newPageSlug: string) {
+export const renamePage = createServerFn({ method: 'POST' })
+    .inputValidator((data: { pageSlug: string; newPageSlug: string }) => data)
+    .handler(async ({ data }) => {
+    const { pageSlug } = data;
+    let { newPageSlug } = data;
     newPageSlug = newPageSlug.toLowerCase();
     if (newPageSlug.length === 0) {
         return { error: 'Slug cannot be empty' };
@@ -15,9 +17,10 @@ export async function renamePage(pageSlug: string, newPageSlug: string) {
         return { error: 'Slug can only contain regular characters and dashes (-)' };
     }
 
+    const { createSupbaseServerClient } = await import("../../../../supabase-server");
     const supabase = await createSupbaseServerClient();
-	const { data } = await supabase.auth.getSession();
-    const isLoggedIn = data.session !== null;
+	const { data: sessionData } = await supabase.auth.getSession();
+    const isLoggedIn = sessionData.session !== null;
     if (!isLoggedIn) {
         return { error: 'You must be logged in' };
     }
@@ -48,4 +51,4 @@ export async function renamePage(pageSlug: string, newPageSlug: string) {
     revalidateWikiPages([pageSlug, newPageSlug]);
 
     return { success: true };
-}
+});

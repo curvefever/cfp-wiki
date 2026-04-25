@@ -25,7 +25,10 @@ export function MenuBar(props: IMenuBarProps) {
           </div>
         </div>
         <Button
-          onClick={() => logout()}
+          onClick={async () => {
+            await logout();
+            window.location.href = "/";
+          }}
           color="danger"
           size="sm"
           className="absolute top-3 right-3"

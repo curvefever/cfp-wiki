@@ -4,7 +4,6 @@ import Popup from '../components/Popup'
 import { Button } from '../components/ui/button';
 import { IPage } from '../features/pages/IPage';
 import { usePopupsContext } from '../app/Popups';
-import { redirect, useRouter } from 'next/navigation';
 import { renamePage } from '../app/[slug]/edit/functions/RenamePage';
 
 interface IProps {
@@ -15,7 +14,6 @@ export default function RenamePagePopup({ page }: IProps) {
     const { dispatch } = usePopupsContext();
     const [formData, setFormData] = useState({ slug: page.slug });
     const [error, setError] = useState('');
-    const router = useRouter();
   
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,14 +22,14 @@ export default function RenamePagePopup({ page }: IProps) {
     async function onSubmit(e: FormEvent<HTMLFormElement>) {
       e.preventDefault();
   
-      const result = await renamePage(page.slug, formData.slug);
+      const result = await renamePage({ data: { pageSlug: page.slug, newPageSlug: formData.slug } });
       if (result.error) {
         setError(result.error);
         return;
       }
   
       dispatch({ type: 'removePopup' });
-      router.push('/' + formData.slug);
+      window.location.href = '/' + formData.slug;
     }
 
     return (

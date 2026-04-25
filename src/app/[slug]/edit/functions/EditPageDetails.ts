@@ -1,6 +1,4 @@
-'use server'
-
-import { createSupbaseServerClient } from "../../../../supabase-server";
+import { createServerFn } from "@tanstack/react-start";
 import { revalidateWikiPages } from "../../../../utils/RevalidateWikiPages";
 
 interface IPageDetails {
@@ -9,7 +7,11 @@ interface IPageDetails {
     next_link: string;
 }
 
-export async function editPageDetails(pageSlug: string, details: IPageDetails) {
+export const editPageDetails = createServerFn({ method: 'POST' })
+    .inputValidator((data: { pageSlug: string; details: IPageDetails }) => data)
+    .handler(async ({ data }) => {
+    const { pageSlug, details } = data;
+
     if (details.title.length === 0) {
         return { error: 'Title cannot be empty' };
     }
@@ -17,9 +19,10 @@ export async function editPageDetails(pageSlug: string, details: IPageDetails) {
         return { error: 'Description cannot be empty' };
     }
 
+    const { createSupbaseServerClient } = await import("../../../../supabase-server");
     const supabase = await createSupbaseServerClient();
-	const { data } = await supabase.auth.getSession();
-    const isLoggedIn = data.session !== null;
+	const { data: sessionData } = await supabase.auth.getSession();
+    const isLoggedIn = sessionData.session !== null;
     if (!isLoggedIn) {
         return { error: 'You must be logged in' };
     }
@@ -32,4 +35,4 @@ export async function editPageDetails(pageSlug: string, details: IPageDetails) {
     revalidateWikiPages([pageSlug]);
 
     return { success: true };
-}
+});

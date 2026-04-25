@@ -1,14 +1,15 @@
-'use server'
-
-import { redirect } from "next/navigation";
+import { createServerFn } from "@tanstack/react-start";
 import { IPageHistory } from "../../../../../features/pages/IPageHistory";
-import { createSupbaseServerClient } from "../../../../../supabase-server";
 import { revalidateWikiPages } from "../../../../../utils/RevalidateWikiPages";
 
-export async function restorePageFromDiff(diffID: string) {
+export const restorePageFromDiff = createServerFn({ method: 'POST' })
+    .inputValidator((data: { diffID: string }) => data)
+    .handler(async ({ data }) => {
+    const { diffID } = data;
+    const { createSupbaseServerClient } = await import("../../../../../supabase-server");
     const supabase = await createSupbaseServerClient();
-	const { data } = await supabase.auth.getSession();
-    const isLoggedIn = data.session !== null;
+	const { data: sessionData } = await supabase.auth.getSession();
+    const isLoggedIn = sessionData.session !== null;
     if (!isLoggedIn) {
         return { error: 'You must be logged in' };
     }
@@ -26,5 +27,5 @@ export async function restorePageFromDiff(diffID: string) {
 
     revalidateWikiPages([history.page]);
 
-    return redirect('/' + history.page);
-}
+    return { redirectTo: '/' + history.page };
+});

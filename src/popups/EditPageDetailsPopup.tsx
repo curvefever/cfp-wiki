@@ -22,7 +22,7 @@ export default function EditPageDetailsPopup({ page }: IProps) {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const result = await editPageDetails(page.slug, formData);
+    const result = await editPageDetails({ data: { pageSlug: page.slug, details: formData } });
     if (result.error) {
       setError(result.error);
       return;

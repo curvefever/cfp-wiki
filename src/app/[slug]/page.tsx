@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { unstable_cache } from "next/cache";
+import { createServerFn } from "@tanstack/react-start";
 import { IPage } from "../../features/pages/IPage";
 import { Main } from "../../components/layout/main";
 import { Button } from "../../components/ui/button";
@@ -20,21 +19,26 @@ import { createSupbasePublicClient } from "../../supabase-public";
 const MAX_RENDERED_CONTENT_CACHE_SIZE = 100;
 const renderedContentCache = new Map<string, string>();
 
-const getPage = unstable_cache(
-  async (slug: string): Promise<IPage | null> => {
-    const supabase = createSupbasePublicClient();
-    const postRes = await supabase
-      .from("pages")
-      .select("slug,title,description,next_link,content")
-      .eq("slug", slug)
-      .single();
-    return postRes.data as IPage | null;
-  },
-  ["pages"],
-  {
-    tags: ["pages"],
-  },
-);
+export const getWikiPageData = createServerFn({ method: "GET" })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    const page = await getPage(data.slug);
+
+    return {
+      page,
+      htmlContent: page ? await renderContent(page.content) : "",
+    };
+  });
+
+async function getPage(slug: string): Promise<IPage | null> {
+  const supabase = createSupbasePublicClient();
+  const postRes = await supabase
+    .from("pages")
+    .select("slug,title,description,next_link,content")
+    .eq("slug", slug)
+    .single();
+  return postRes.data as IPage | null;
+}
 
 async function renderContent(content: string) {
   const cachedHtml = renderedContentCache.get(content);
@@ -64,22 +68,10 @@ async function renderContent(content: string) {
   return htmlContent;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const page = await getPage(params.slug);
+type WikiPageData = Awaited<ReturnType<typeof getWikiPageData>>;
 
-  return {
-    title: `CF Wiki | ${page?.title || "Page not found"}`,
-    description: page?.description || "",
-  };
-}
-
-export default async function Page({ params }: { params: { slug: string } }) {
-  const pageSlug = params.slug;
-  const page = await getPage(pageSlug);
+export function WikiPage({ data, pageSlug }: { data: WikiPageData; pageSlug: string }) {
+  const { page, htmlContent } = data;
 
   if (!page) {
     return (
@@ -91,8 +83,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
       </Main>
     );
   }
-
-  const htmlContent = await renderContent(page.content);
 
   return (
     <Main menuItems={<MenuButtons page={page} />}>

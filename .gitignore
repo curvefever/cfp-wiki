@@ -9,8 +9,10 @@
 # testing
 /coverage
 
-# next.js
+# framework output
 /.next/
+/.tanstack/
+/.output/
 /out/
 
 # production

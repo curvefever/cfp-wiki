@@ -1,17 +1,16 @@
-'use server';
-import { redirect } from "next/navigation";
-import { createSupbaseServerClient } from "../../supabase-server";
+import { createServerFn } from "@tanstack/react-start";
 
 export type LogoutResponse = {
     error?: string;
 };
 
-export async function logout() {
+export const logout = createServerFn({ method: 'POST' }).handler(async (): Promise<LogoutResponse> => {
+    const { createSupbaseServerClient } = await import("../../supabase-server");
     const supabase = await createSupbaseServerClient();
     const { error } = await supabase.auth.signOut();
 
     if (error) {
         return { error: error.message };
     }
-    return redirect('/');
-}
+    return {};
+});
