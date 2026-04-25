@@ -17,6 +17,7 @@ import {
 } from "./pages.repository";
 
 const slugRegex = /^[a-z-]+$/;
+type PageUpdateResult = Awaited<ReturnType<typeof updatePageContent>>;
 
 export async function getWikiPageData(slug: string) {
   const page = await getPublicPageBySlug(slug);
@@ -152,7 +153,7 @@ export async function renameWikiPage({
   const changedPageSlugs = new Set([pageSlug, normalizedSlug]);
   const pages = await getAllPages();
   const updatePromises = pages.flatMap((page) => {
-    const updates = [];
+    const updates: Promise<PageUpdateResult>[] = [];
 
     if (page.next_link === pageSlug) {
       updates.push(updatePageNextLink(page.slug, normalizedSlug));
@@ -172,7 +173,7 @@ export async function renameWikiPage({
   });
 
   const updateResults = await Promise.all(updatePromises);
-  const failedUpdate = updateResults.find((result) => result.error);
+  const failedUpdate = updateResults.find((result: PageUpdateResult) => result.error);
   if (failedUpdate?.error) {
     return { error: failedUpdate.error.message };
   }

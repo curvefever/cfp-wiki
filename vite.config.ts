@@ -11,5 +11,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
-  plugins: [tanstackStart(), viteReact(), nitro()],
+  plugins: [
+    tanstackStart(),
+    viteReact(),
+    nitro({
+      preset: 'cloudflare-module',
+      compatibilityDate: '2026-04-25',
+    }),
+  ],
 })

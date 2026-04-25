@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# CFP Wiki
 
-## Getting Started
+TanStack Start wiki app deployed as a Cloudflare Worker with Wrangler.
 
-First, run the development server:
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the Vite development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cloudflare Worker
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The production build uses Nitro's `cloudflare-module` preset. `wrangler.jsonc` stores the Worker name, compatibility date, and Node.js compatibility flag. Nitro reads that file during the build and writes the deployable Worker config to `.output/server/wrangler.json`.
 
-## Learn More
+Build the Worker bundle:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Preview the built Worker locally with Wrangler:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+npm run preview
+```
 
-## Deploy on Vercel
+Deploy to Cloudflare Workers:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run deploy
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The deploy script builds first, then runs `wrangler deploy --config .output/server/wrangler.json`.
+
+## Environment Variables
+
+The app expects the public Supabase values used by the wiki:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+VITE_API_ENDPOINT=
+```
+
+For local Vite development, put them in `.env.local`. For the deployed Worker, configure them in Cloudflare as Worker variables or secrets. Do not commit secret values.
+
+## Useful Scripts
+
+```bash
+npm run dev        # Vite dev server
+npm run build      # Build the Cloudflare Worker output
+npm run start      # Run the existing build with Wrangler
+npm run preview    # Build and run locally with Wrangler
+npm run deploy     # Build and deploy with Wrangler
+npm run typecheck  # TypeScript check
+```

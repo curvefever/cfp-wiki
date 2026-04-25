@@ -1,3 +1,5 @@
+"use client";
+
 import AuthenticatedOnly from "../../../../components/AuthenticatedOnly";
 import { Main } from "../../../../components/layout/main";
 import { Button } from "../../../../components/ui/button";
@@ -38,12 +40,14 @@ export function WikiPage({
       ></div>
 
       {pageSlug !== "home" && <HomeLink className="absolute bottom-0" />}
-      <a href={`/${pageSlug}`}>
-        <Icon
-          icon="arrow-left"
-          className="absolute bottom-0 left-[50%] translate-x-[-50%] p-3 h-12 rotate-90"
-        />
-      </a>
+      <button
+        type="button"
+        aria-label="Back to top"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="absolute bottom-0 left-[50%] h-12 w-12 translate-x-[-50%] p-3 text-primary hover:text-primary-light"
+      >
+        <Icon icon="arrow-left" className="block h-full w-full rotate-90" />
+      </button>
       {page.next_link && (
         <a
           href={`/${page.next_link}`}
