@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "../ui/button";
-import { IPage } from "../../features/pages/IPage";
-import { lazy, Suspense, useEffect } from "react";
-import { saveEditorChanges } from "../../app/[slug]/edit/functions/SaveEditorChanges";
-import { discardEditorChanges } from "../../app/[slug]/edit/functions/DiscardEditorChanges";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { Button } from "../../../../components/ui/button";
+import type { Page } from "../../pages.types";
+import { saveEditorChanges } from "../../server/pages.server-fns";
 
 const ForwardRefEditor = lazy(() => import("./InitializedMDXEditor"));
 
-export default function Editor({ page }: { page: IPage }) {
+export default function Editor({ page }: { page: Page }) {
   const [content, setContent] = useState(page.content);
   const [isEditorLoaded, setIsEditorLoaded] = useState(false);
   const [summary, setSummary] = useState("");
@@ -39,8 +37,7 @@ export default function Editor({ page }: { page: IPage }) {
   }
 
   async function discardChanges() {
-    const res = await discardEditorChanges(page);
-    window.location.href = res.redirectTo;
+    window.location.href = `/${page.slug}`;
   }
 
   return (

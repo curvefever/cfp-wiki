@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute, useMatches } from "@tanstack/react-router";
-import PageHistory, { getPageHistoryData } from "../../app/[slug]/history/page";
+import { PageHistory } from "../../features/pages/components/history/PageHistory";
+import { getPageHistoryData } from "../../features/pages/server/pages.server-fns";
 
 export const Route = createFileRoute("/$slug/history")({
   loader: ({ params }) => getPageHistoryData({ data: { slug: params.slug } }),

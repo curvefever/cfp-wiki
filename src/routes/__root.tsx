@@ -6,13 +6,13 @@ import {
   createRootRoute,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import Popups from "../app/Popups";
+import PopupProvider from "../components/overlays/PopupProvider";
 import { AuthProvider } from "../features/auth/components/AuthProvider";
 import { getInitialAuth } from "../features/auth/server/auth.server-fns";
 import asapRegularWoff2 from "../assets/fonts/asap-regular-webfont.woff2?url";
 import asapSemiboldWoff2 from "../assets/fonts/asap-semibold-webfont.woff2?url";
 import asapBoldWoff2 from "../assets/fonts/asap-bold-webfont.woff2?url";
-import "../app/globals.css";
+import "../styles/globals.css";
 import "../styles/markdown.css";
 
 export const Route = createRootRoute({
@@ -87,9 +87,9 @@ function RootComponent() {
   return (
     <RootDocument>
       <AuthProvider initialAuth={initialAuth}>
-        <Popups>
+        <PopupProvider>
           <Outlet />
-        </Popups>
+        </PopupProvider>
       </AuthProvider>
     </RootDocument>
   );

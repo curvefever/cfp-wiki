@@ -2,10 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Button } from "../../components/ui/button";
-import { useAuth } from "../../features/auth/components/AuthProvider";
+import { Button } from "../../../components/ui/button";
+import { useAuth } from "./AuthProvider";
 
-export default function Login() {
+export function LoginPage() {
   const { clearError, error, isLoggedIn, login, status } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
