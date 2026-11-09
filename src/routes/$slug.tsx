@@ -1,14 +1,12 @@
 import { Outlet, createFileRoute, useMatches } from "@tanstack/react-router";
 import { WikiPage } from "../features/pages/components/wiki/WikiPage";
+import { getWikiPageMeta } from "../features/pages/pages.meta";
 import { getWikiPageData } from "../features/pages/server/pages.server-fns";
 
 export const Route = createFileRoute("/$slug")({
   loader: ({ params }) => getWikiPageData({ data: { slug: params.slug } }),
   head: ({ loaderData }) => ({
-    meta: [
-      { title: `CF Wiki | ${loaderData?.page?.title || "Page not found"}` },
-      { name: "description", content: loaderData?.page?.description || "" },
-    ],
+    meta: getWikiPageMeta(loaderData?.page).meta,
   }),
   component: WikiRoute,
 });

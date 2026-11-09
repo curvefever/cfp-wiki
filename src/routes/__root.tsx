@@ -12,6 +12,7 @@ import { getInitialAuth } from "../features/auth/server/auth.server-fns";
 import asapRegularWoff2 from "../assets/fonts/asap-regular-webfont.woff2?url";
 import asapSemiboldWoff2 from "../assets/fonts/asap-semibold-webfont.woff2?url";
 import asapBoldWoff2 from "../assets/fonts/asap-bold-webfont.woff2?url";
+import { WIKI_HOME_DESCRIPTION } from "../features/pages/pages.meta";
 import "../styles/globals.css";
 import "../styles/markdown.css";
 
@@ -24,8 +25,7 @@ export const Route = createRootRoute({
       { title: "CF Wiki" },
       {
         name: "description",
-        content:
-          "The official Curve Fever Pro wiki. The ultimate game guide where you can find all the information you need to know about Curve Fever.",
+        content: WIKI_HOME_DESCRIPTION,
       },
       { name: "application-name", content: "CF Wiki" },
       { name: "referrer", content: "origin-when-cross-origin" },
@@ -36,17 +36,6 @@ export const Route = createRootRoute({
       },
       { name: "creator", content: "Curve Fever Pro" },
       { name: "publisher", content: "Curve Fever Pro" },
-      { property: "og:title", content: "CF Wiki" },
-      {
-        property: "og:description",
-        content:
-          "The official Curve Fever Pro wiki. The ultimate game guide where you can find all the information you need to know about Curve Fever.",
-      },
-      { property: "og:url", content: "https://wiki.curvefever.pro" },
-      { property: "og:site_name", content: "CF Wiki" },
-      { property: "og:image", content: "https://wiki.curvefever.pro/icon.png" },
-      { property: "og:locale", content: "en_US" },
-      { property: "og:type", content: "website" },
       { name: "robots", content: "index, follow" },
     ],
     links: [
